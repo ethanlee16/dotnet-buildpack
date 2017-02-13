@@ -133,26 +133,3 @@ echo "Reading App Name from project.json"
 PROJECT_DIR_NAME=$(basename $PROJECT_DIR)
 PROJECT_NAME=$(ruby -rjson -e "j = JSON.parse(File.open('${PROJECT_DIR}/project.json','r:bom|utf-8').read); unless j['buildOptions'].nil? ; puts j['buildOptions']['outputName'];end")
 echo "${PROJECT_NAME:=$PROJECT_DIR_NAME}"
-
-echo "Restoring the packages"
-dotnet restore ${SRC_DIR}
-
-# configure some npm command during building
-export PATH="${PROJECT_DIR}/node_modules/.bin:${PATH}"
-
-echo "Publishing the app"
-# Publish to heroku_output
-dotnet publish ${PROJECT_JSON_FILE} --output ${BUILD_DIR}/heroku_output --configuration ${CORE_CONFIGURATION}
-
-echo "Publish Successed"
-
-mkdir -p ${BUILD_DIR}/.profile.d
-cp -n ${BUILDPACK_DIR}/.profile.d/* ${BUILD_DIR}/.profile.d/
-
-if [ -e ${SRC_DIR}/Procfile ]; then
-	cp ${SRC_DIR}/Procfile ${BUILD_DIR}
-else
-	cat << EOT >> ${BUILD_DIR}/Procfile
-web: cd \$HOME/heroku_output && dotnet ./${PROJECT_NAME}.dll --server.urls http://+:\$PORT ${CORE_ENVIRONMENT}
-EOT
-fi
