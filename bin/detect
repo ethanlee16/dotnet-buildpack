@@ -4,5 +4,5 @@
 if [ -n "$( find $1 -maxdepth 5 -iname project.json )" ]; then
   echo "ASP.NET Core" && exit 0
 else
-  echo "no" && exit 1
+  echo "no, but building anyway :-)" && exit 0
 fi
